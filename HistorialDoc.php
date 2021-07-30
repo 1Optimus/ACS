@@ -145,22 +145,12 @@
 			}			
 			$conn->close();	
 
-
-
-
-
-
-
-
               //  }
            // }
-
            		
 			?>
 			</div>	<!-- .tm-content -->							
-        </div>	<!-- row -->				
-    
-    
+        </div>	<!-- row -->				 
         <!-- no quitar -->			
 		<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 		<script type="text/javascript" src="js/jquery.backstretch.min.js"></script>
