@@ -28,14 +28,15 @@
 					$doc=$_SESSION['dpi'];
 					$dpi=$_POST['dpi'];				
 					$string = $_POST["gr"];
-					//
+					//de los datos de la receta se pasan a una matriz, esots viene separados por ; y ,
 					$token = strtok($string, ";");				
 					while ($token !== false)
 						{				
 							$mat[$x]=$token;
 							$token = strtok(";");
 							$x=$x+1;
-						}				
+						}
+						//se sigue buscando los datos y a esta matriz se le busca el costo de cada medicamento				
 					for ($i=0; $i <$x ; $i++) { 
 						$y=0;
 						$string2 = $mat[$i];
@@ -44,6 +45,7 @@
 						{				
 							$mat2[$i][$y]=$token2;
 							$token2 = strtok(",");
+							//obtencion de costos por medicamento
 							if($y==0){
 								$sqlD = "SELECT costo FROM `medicamento` where codigo=".$mat2[$i][$y]."";
 								$resultD = $conn->query($sqlD);
@@ -51,25 +53,31 @@
 									$mat2[$i][3]=$row['costo'];
 								}
 							}
+							//al ser 2, es porque ya termino entonces hace el total de costos por medicamento
 							if($y==2){
 								$mat2[$i][4]=$mat2[$i][$y]*$mat2[$i][3];
 							}									
 							$y=$y+1;								
 						}
 					}
+					// obtencion de costo total de la factura
 					for ($i=0; $i < $x; $i++) { 
 						$tot=$tot+$mat2[$i][4];
 					}
+					//ya teniendo todos los datos, estos son ingresados a la base de datos
+					//ingreso de factura con el monto total
 					$sql = "INSERT INTO `receta`(`cod_cliente`, `fecha`, `estado`, `cod_farm`, `costo_tot`,  `cod_doc`) VALUES (".$dpi.",'".$fecha."','pendiente',1,'".$tot."',".$doc.")";
 					$result = $conn->query($sql);
 					if (!($result == true)) {
 						echo $result;
 					}	
+					//se obtiene el ultimo en la receta para guardar el detalle con ese numero de factura
 					$sqlD = "select MAX(codigo) as ma from receta";
 					$resultD = $conn->query($sqlD);
 					if($row = $resultD->fetch_assoc()){
 							$rec=$row['ma'];
 					}
+					//se ingresa cada mdicamento de la factura
 					for ($i=0; $i < $x; $i++) { 
 						$sql = "INSERT INTO `detalle`(`cod_med`, `cod_receta`, `dosis`, `cantidad`, `total`) VALUES (".$mat2[$i][0].",".$rec.",'".$mat2[$i][1]."',".$mat2[$i][2].",'".$mat2[$i][4]."');";
 						$result = $conn->query($sql);
@@ -89,11 +97,11 @@
 			if ($result->num_rows > 0) {
 				$x=0;
 				while($row = $result->fetch_assoc()) {					
-				$mat[$x][0]=$row["codigo"];
-				$mat[$x][3]=$row["fecha"];				
-				$mat[$x][1]=$row["costo_tot"];
-				$mat[$x][4]=$row["nombre"]." ".$row["apellido"];
-				$mat[$x][2]=$row["estado"];				
+				$mat2[$x][0]=$row["codigo"];
+				$mat2[$x][3]=$row["fecha"];				
+				$mat2[$x][1]=$row["costo_tot"];
+				$mat2[$x][4]=$row["nombre"]." ".$row["apellido"];
+				$mat2[$x][2]=$row["estado"];				
 				$x++;
 				}
 			} else {
@@ -101,9 +109,9 @@
 			}
 			if($error==0){
 			for($i=0;$i<$x;$i++){
-				$sql = "SELECT detalle.dosis, detalle.cantidad, medicamento.nombre, medicamento.presentacion, detalle.total FROM `detalle`,`medicamento` WHERE medicamento.codigo=detalle.cod_med AND detalle.cod_receta=".$mat[$i][0]." ";
+				$sql = "SELECT detalle.dosis, detalle.cantidad, medicamento.nombre, medicamento.presentacion, detalle.total FROM `detalle`,`medicamento` WHERE medicamento.codigo=detalle.cod_med AND detalle.cod_receta=".$mat2[$i][0]." ";
 				$result = $conn->query($sql);
-				echo '<p class="accordion">De: '.$mat[$i][4].' el: '.$mat[$i][3].' estado:'.$mat[$i][2].'</p>
+				echo '<p class="accordion">De: '.$mat2[$i][4].' el: '.$mat2[$i][3].' estado:'.$mat2[$i][2].'</p>
 				<div class="panel">
 				<div class="p2">
 				<table>               
@@ -119,10 +127,10 @@
 			} else {
 				echo "0 results";
 			}
-			echo '<tr><td></td><td></td><td></td><td></td><td><span class="badge badge-success	">Total a pagar: '.$mat[$i][1].'</span>		</td></tr></table>
+			echo '<tr><td></td><td></td><td></td><td></td><td><span class="badge badge-success	">Total a pagar: '.$mat2[$i][1].'</span>		</td></tr></table>
                 </div>
                 
-			 <input type="text" name="receta" value="'.$mat[$i][0].'" hidden>			
+			 <input type="text" name="receta" value="'.$mat2[$i][0].'" hidden>			
                 </div>
                 
               ';

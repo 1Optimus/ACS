@@ -50,7 +50,7 @@
 		<div class="row tm-main-row">		
 			<?php  include 'barra.php'; include 'cone.php';
 			?>
-			<div>
+			<div class="ml-5">
 				<h2>Nueva Receta</h2>
 				<form method="POST" action="HistorialDoc.php?cod=1">
 				<a>DPI: </a>
@@ -71,7 +71,7 @@
 				</select>				
 				<a>Nombre: </a><input type="text" id="nombre" name="nombre" placeholder="Nombre Cliente" readonly="true" />
 				<a>Fecha: </a><input type="date" name="fecha" required/>											
-				<button  name="btnInser" type="submit" onclick="guardar();"class="btn btn-warning">Finalizar</button>
+				<button  name="btnInser" type="submit" onclick="guardar();"class="btn btn-warning ml-4">Finalizar</button>
 				<input type="text" value="" id="gr" name="gr" hidden><input type="text" value="" id="dpi" name="dpi" hidden>
 				</form>
 					<div>
