@@ -18,93 +18,81 @@
 		<div class="row tm-main-row">	
 			<?php  
 			$x=0;$y=0;$tot=0;$rec=0;
-			include 'barra.php'; include 'cone.php'; 
+			include 'barra.php'; include 'cone.php';
+			//verificamos si es ingreso de receta 
 			if(isset($_GET['cod'])){
+				// 1 si es ingreso de factura
 				if($_GET['cod']==1){
-				$fecha=$_POST['fecha'];
-				$doc=$_SESSION['dpi'];
-				$dpi=$_POST['dpi'];				
-				$string = $_POST["gr"];
-				$token = strtok($string, ";");				
-				while ($token !== false)
-				{				
-				$mat[$x]=$token;
-				$token = strtok(";");
-				$x=$x+1;
-				}				
-				for ($i=0; $i <$x ; $i++) { 
-				$y=0;
-				$string2 = $mat[$i];
-				$token2 = strtok($string2, ",");				
-				while ($token2 !== false)
-				{				
-				$mat2[$i][$y]=$token2;
-				$token2 = strtok(",");
-				if($y==0){
-					 $sqlD = "SELECT costo FROM `medicamento` where codigo=".$mat2[$i][$y]."";
-					 $resultD = $conn->query($sqlD);
-					 if($row = $resultD->fetch_assoc()){
-						$mat2[$i][3]=$row['costo'];
-					 }
-				}
-				if($y==2){
-					$mat2[$i][4]=$mat2[$i][$y]*$mat2[$i][3];
-				}									
-				$y=$y+1;								
-				}
-				}
-				for ($i=0; $i < $x; $i++) { 
-					$tot=$tot+$mat2[$i][4];
-				}
-				$sql = "INSERT INTO `receta`(`cod_cliente`, `fecha`, `estado`, `cod_farm`, `costo_tot`,  `cod_doc`) VALUES (".$dpi.",'".$fecha."','pendiente',1,'".$tot."',".$doc.")";
-				$result = $conn->query($sql);
-				if (!($result == true)) {
-        			echo $result;
-				}	
-				$sqlD = "select MAX(codigo) as ma from receta";
-				$resultD = $conn->query($sqlD);
-				if($row = $resultD->fetch_assoc()){
-						$rec=$row['ma'];
-				}
-				for ($i=0; $i < $x; $i++) { 
-				$sql = "INSERT INTO `detalle`(`cod_med`, `cod_receta`, `dosis`, `cantidad`, `total`) VALUES (".$mat2[$i][0].",".$rec.",'".$mat2[$i][1]."',".$mat2[$i][2].",'".$mat2[$i][4]."');";
-				$result = $conn->query($sql);
-				if (!($result == true)) {
-        			echo "Error: "+$result;
-				}
-				}				
-				}
+					//obtencion de datos importantes para ingreso de factura
+					$fecha=$_POST['fecha'];
+					$doc=$_SESSION['dpi'];
+					$dpi=$_POST['dpi'];				
+					$string = $_POST["gr"];
+					//
+					$token = strtok($string, ";");				
+					while ($token !== false)
+						{				
+							$mat[$x]=$token;
+							$token = strtok(";");
+							$x=$x+1;
+						}				
+					for ($i=0; $i <$x ; $i++) { 
+						$y=0;
+						$string2 = $mat[$i];
+						$token2 = strtok($string2, ",");				
+						while ($token2 !== false)
+						{				
+							$mat2[$i][$y]=$token2;
+							$token2 = strtok(",");
+							if($y==0){
+								$sqlD = "SELECT costo FROM `medicamento` where codigo=".$mat2[$i][$y]."";
+								$resultD = $conn->query($sqlD);
+								if($row = $resultD->fetch_assoc()){
+									$mat2[$i][3]=$row['costo'];
+								}
+							}
+							if($y==2){
+								$mat2[$i][4]=$mat2[$i][$y]*$mat2[$i][3];
+							}									
+							$y=$y+1;								
+						}
+					}
+					for ($i=0; $i < $x; $i++) { 
+						$tot=$tot+$mat2[$i][4];
+					}
+					$sql = "INSERT INTO `receta`(`cod_cliente`, `fecha`, `estado`, `cod_farm`, `costo_tot`,  `cod_doc`) VALUES (".$dpi.",'".$fecha."','pendiente',1,'".$tot."',".$doc.")";
+					$result = $conn->query($sql);
+					if (!($result == true)) {
+						echo $result;
+					}	
+					$sqlD = "select MAX(codigo) as ma from receta";
+					$resultD = $conn->query($sqlD);
+					if($row = $resultD->fetch_assoc()){
+							$rec=$row['ma'];
+					}
+					for ($i=0; $i < $x; $i++) { 
+						$sql = "INSERT INTO `detalle`(`cod_med`, `cod_receta`, `dosis`, `cantidad`, `total`) VALUES (".$mat2[$i][0].",".$rec.",'".$mat2[$i][1]."',".$mat2[$i][2].",'".$mat2[$i][4]."');";
+						$result = $conn->query($sql);
+						if (!($result == true)) {
+							echo "Error: "+$result;
+						}
+					}				
+					}
 			}            
             echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">
             <h1>Historial de recetas</h1>
-            ';?>
-			<!--
-            <form id="buscador" name="buscador" method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-            <input id="buscar" name="buscar" type="search" placeholder="Buscar aquí…" autofocus >
-            <input type="submit" name="buscador" class="boton peque aceptar" value="buscar">
-            </form>	
-            -->
-            <?php
-			/*
-            if($_POST){
-                $busqueda = trim($_POST['buscar']);
-                $entero = 0;
-                if (empty($busqueda)){
-                $texto = 'Búsqueda sin resultados';
-                }
-                else{
-
-*/
-                    
+            ';          
             $error=0;
 			$sql = "SELECT receta.codigo, receta.costo_tot,receta.fecha, receta.estado, cliente.nombre, cliente.apellido FROM `receta`,`cliente` WHERE receta.cod_cliente=cliente.dpi AND receta.cod_doc=".$_SESSION['dpi']."";
 			echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">';
 			$result = $conn->query($sql);	
 			if ($result->num_rows > 0) {
 				$x=0;
-				while($row = $result->fetch_assoc()) {	
-				$mat[$x][0]=$row["codigo"];$mat[$x][3]=$row["fecha"];
-				$mat[$x][1]=$row["costo_tot"];$mat[$x][4]=$row["nombre"]." ".$row["apellido"];
+				while($row = $result->fetch_assoc()) {					
+				$mat[$x][0]=$row["codigo"];
+				$mat[$x][3]=$row["fecha"];				
+				$mat[$x][1]=$row["costo_tot"];
+				$mat[$x][4]=$row["nombre"]." ".$row["apellido"];
 				$mat[$x][2]=$row["estado"];				
 				$x++;
 				}
@@ -113,7 +101,6 @@
 			}
 			if($error==0){
 			for($i=0;$i<$x;$i++){
-				
 				$sql = "SELECT detalle.dosis, detalle.cantidad, medicamento.nombre, medicamento.presentacion, detalle.total FROM `detalle`,`medicamento` WHERE medicamento.codigo=detalle.cod_med AND detalle.cod_receta=".$mat[$i][0]." ";
 				$result = $conn->query($sql);
 				echo '<p class="accordion">De: '.$mat[$i][4].' el: '.$mat[$i][3].' estado:'.$mat[$i][2].'</p>
@@ -143,11 +130,7 @@
 			}else{
 
 			}			
-			$conn->close();	
-
-              //  }
-           // }
-           		
+			$conn->close();	           		
 			?>
 			</div>	<!-- .tm-content -->							
         </div>	<!-- row -->				 
