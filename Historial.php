@@ -40,25 +40,7 @@
 		}           
             echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">
             <h1>Historial de recetas</h1>
-            ';?>
-			<!--
-            <form id="buscador" name="buscador" method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-            <input id="buscar" name="buscar" type="search" placeholder="Buscar aquí…" autofocus >
-            <input type="submit" name="buscador" class="boton peque aceptar" value="buscar">
-            </form>	
-            -->
-            <?php
-			/*
-            if($_POST){
-                $busqueda = trim($_POST['buscar']);
-                $entero = 0;
-                if (empty($busqueda)){
-                $texto = 'Búsqueda sin resultados';
-                }
-                else{
-
-*/
-                    
+            ';            
             $error=0;
 			$sql = "SELECT receta.codigo, receta.costo_tot,receta.fecha, receta.estado, doctor.nombre as doc, doctor.apellido FROM `receta`,`doctor`,`cliente` WHERE receta.cod_doc=doctor.dpi AND receta.cod_cliente=cliente.dpi AND receta.cod_cliente=".$_SESSION['dpi']."";
 			echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">';
@@ -107,16 +89,9 @@
 
 			}			
 			$conn->close();	
-
-              //  }
-           // }
-
-           		
 			?>
 			</div>	<!-- .tm-content -->							
         </div>	<!-- row -->				
-    
-    
         <!-- no quitar -->			
 		<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 		<script type="text/javascript" src="js/jquery.backstretch.min.js"></script>

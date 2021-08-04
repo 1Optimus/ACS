@@ -1,11 +1,3 @@
-/* 	
-
-Template 2102 Constructive
-
-http://www.tooplate.com/view/2102-constructive
-
-*/
-
 body {
 	font-family: 'Open Sans', Helvetica, Arial, sans-serif;
 	font-size: 18px;
@@ -552,9 +544,7 @@ address { font-size: 1rem; }
 .accordion:hover {
     background-color: #527e6a;
 }
-.panel {
-    padding: 0 18px;
-  background:rgba(50, 50, 50, 1);
+.panel { 
     display: none;
     overflow: hidden;
 }
@@ -575,7 +565,7 @@ p {
     height: auto;
    display: flex;
    justify-content: center;
-   align-items: center;
+   align-items: center;   
 }
  table {
      color: white;
