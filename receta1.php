@@ -51,7 +51,7 @@
 			<?php  include 'barra.php'; include 'cone.php';
 			?>
 			<div class="ml-5">
-				<h2>Nueva Receta</h2>
+				<h2 class="font-weight-bold mb-3 mt-3">Nueva Receta</h2>
 				<form method="POST" action="HistorialDoc.php?cod=1">
 				<a>DPI: </a>
 				<select id="cliente" name="cliente "onchange="cambio();">

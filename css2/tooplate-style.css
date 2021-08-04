@@ -148,3 +148,8 @@ p {
     left: 0;
     display: none;
 }
+.menu { 
+    background: gray; 
+    min-height: 100vh; 
+    height: 100%;
+   }
