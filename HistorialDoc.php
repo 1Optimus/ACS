@@ -15,7 +15,7 @@
 <body>
 	<!-- Page Content -->	
 	<div class="container-fluid tm-main">
-		<div class="row tm-main-row">	
+		<div class="">	
 			<?php  
 			$x=0;$y=0;$tot=0;$rec=0;$error=0;
 			include 'barra.php'; include 'cone.php';
@@ -113,11 +113,11 @@
 			if ($error==1) {
 				echo "<script>alert('ha ocurrido un error fatal, elimine la receta que ha ingresado si esta se encontrara ingresada');</script>";        
 			}			
-            echo '<div class="d-flex flex-wrap align-content-center justify-content-center">
-			<div class="p-2"><h1 class="mb-3 mt-3">Historial de recetas</h1></div>';
+            echo '<div class="col-9 flex-column">
+			<div class="col-12"><h1 class="mb-3 mt-3">Historial de recetas</h1></div>';
             $error=0;
 			$sql = "SELECT receta.codigo, receta.costo_tot,receta.fecha, receta.estado, cliente.nombre, cliente.apellido FROM `receta`,`cliente` WHERE receta.cod_cliente=cliente.dpi AND receta.cod_doc=".$_SESSION['dpi']."";
-			echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">';
+			echo '<div class="col-12 ">';
 			$result = $conn->query($sql);	
 			if ($result->num_rows > 0) {
 				$x=0;

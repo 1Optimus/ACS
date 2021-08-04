@@ -17,8 +17,7 @@
 
 	<!-- Page Content -->	
 	<div class="container-fluid tm-main">
-		<div class="row tm-main-row">	
-        
+		<div class="">
             <?php  
 			include 'barra.php'; include 'cone.php';  
 			if (isset($_GET["dat"])) {
@@ -38,12 +37,12 @@
 				echo "<script language='javascript'>alert('tuvimos un pequeño problema, favor de llamar a servicio tecnico');</script>";			
 			}
 		}           
-		echo '<div class="col-9 ">
-            <h1>Historial de recetas</h1>
+		echo '<div class="col-9 align-content-center">
+            <div class="col-12"><center><h1>Historial de recetas</h1></center></div>
             ';            
             $error=0;
 			$sql = "SELECT receta.codigo, receta.costo_tot,receta.fecha, receta.estado, doctor.nombre as doc, doctor.apellido FROM `receta`,`doctor`,`cliente` WHERE receta.cod_doc=doctor.dpi AND receta.cod_cliente=cliente.dpi AND receta.cod_cliente=".$_SESSION['dpi']."";
-			echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">';
+			echo '<div class="col-12 ">';
 			$result = $conn->query($sql);	
 			if ($result->num_rows > 0) {
 				$x=0;
