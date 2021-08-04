@@ -38,7 +38,7 @@
 				echo "<script language='javascript'>alert('tuvimos un pequeño problema, favor de llamar a servicio tecnico');</script>";			
 			}
 		}           
-            echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">
+		echo '<div class="col-9 ">
             <h1>Historial de recetas</h1>
             ';            
             $error=0;
@@ -92,7 +92,9 @@
 			?>
 			</div>	<!-- .tm-content -->							
         </div>	<!-- row -->				
-        <!-- no quitar -->			
+        <!-- no quitar -->	
+		</div>
+    </div>		
 		<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
 		<script type="text/javascript" src="js/jquery.backstretch.min.js"></script>
 		<script>
