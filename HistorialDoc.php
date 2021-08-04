@@ -17,7 +17,7 @@
 	<div class="container-fluid tm-main">
 		<div class="row tm-main-row">	
 			<?php  
-			$x=0;$y=0;$tot=0;$rec=0;
+			$x=0;$y=0;$tot=0;$rec=0;$error=0;
 			include 'barra.php'; include 'cone.php';
 			//verificamos si es ingreso de receta 
 			if(isset($_GET['cod'])){
@@ -48,48 +48,73 @@
 							//obtencion de costos por medicamento
 							if($y==0){
 								$sqlD = "SELECT costo FROM `medicamento` where codigo=".$mat2[$i][$y]."";
-								$resultD = $conn->query($sqlD);
-								if($row = $resultD->fetch_assoc()){
-									$mat2[$i][3]=$row['costo'];
-								}
+								try {
+									$resultD = $conn->query($sqlD);
+									if($row = $resultD->fetch_assoc()){
+										$mat2[$i][3]=$row['costo'];
+									}
+								} catch (\Throwable $th) {
+									console.log("en obtener costos error");
+									$error=1;
+								}																
 							}
 							//al ser 2, es porque ya termino entonces hace el total de costos por medicamento
-							if($y==2){
+							if(($y==2) && ($error!=1)){
 								$mat2[$i][4]=$mat2[$i][$y]*$mat2[$i][3];
 							}									
 							$y=$y+1;								
 						}
 					}
 					// obtencion de costo total de la factura
-					for ($i=0; $i < $x; $i++) { 
-						$tot=$tot+$mat2[$i][4];
-					}
-					//ya teniendo todos los datos, estos son ingresados a la base de datos
-					//ingreso de factura con el monto total
-					$sql = "INSERT INTO `receta`(`cod_cliente`, `fecha`, `estado`, `cod_farm`, `costo_tot`,  `cod_doc`) VALUES (".$dpi.",'".$fecha."','pendiente',1,'".$tot."',".$doc.")";
-					$result = $conn->query($sql);
-					if (!($result == true)) {
-						echo $result;
-					}	
-					//se obtiene el ultimo en la receta para guardar el detalle con ese numero de factura
-					$sqlD = "select MAX(codigo) as ma from receta";
-					$resultD = $conn->query($sqlD);
-					if($row = $resultD->fetch_assoc()){
-							$rec=$row['ma'];
-					}
-					//se ingresa cada mdicamento de la factura
-					for ($i=0; $i < $x; $i++) { 
-						$sql = "INSERT INTO `detalle`(`cod_med`, `cod_receta`, `dosis`, `cantidad`, `total`) VALUES (".$mat2[$i][0].",".$rec.",'".$mat2[$i][1]."',".$mat2[$i][2].",'".$mat2[$i][4]."');";
-						$result = $conn->query($sql);
-						if (!($result == true)) {
-							echo "Error: "+$result;
+					if($error==0){
+						for ($i=0; $i < $x; $i++) { 
+							$tot=$tot+$mat2[$i][4];
 						}
-					}				
-					}
-			}            
+						//ya teniendo todos los datos, estos son ingresados a la base de datos
+						//ingreso de factura con el monto total
+						$sql = "INSERT INTO `receta`(`cod_cliente`, `fecha`, `estado`, `cod_farm`, `costo_tot`,  `cod_doc`) VALUES (".$dpi.",'".$fecha."','pendiente',1,'".$tot."',".$doc.")";
+						try {
+							$result = $conn->query($sql);
+							if (!($result == true)) {
+								echo $result;
+							}
+						} catch (\Throwable $th) {
+							console.log("en insertar receta");
+							$error=1;
+						}							
+						//se obtiene el ultimo en la receta para guardar el detalle con ese numero de factura
+						$sqlD = "select MAX(codigo) as ma from receta";
+						try {
+							$resultD = $conn->query($sqlD);
+							if($row = $resultD->fetch_assoc()){
+									$rec=$row['ma'];
+							}
+						} catch (\Throwable $th) {
+							console.log("en obtener maximo");
+							$error=1;
+						}						
+						//se ingresa cada mdicamento de la factura
+						for ($i=0; $i < $x; $i++) { 
+							$sql = "INSERT INTO `detalle`(`cod_med`, `cod_receta`, `dosis`, `cantidad`, `total`) VALUES (".$mat2[$i][0].",".$rec.",'".$mat2[$i][1]."',".$mat2[$i][2].",'".$mat2[$i][4]."');";
+							try {
+								$result = $conn->query($sql);
+								if (!($result == true)) {
+									echo "Error: "+$result;
+								}
+							} catch (\Throwable $th) {
+								console.log("en insertar detalles factura");
+								$error=1;
+								$i=$x;
+							}							
+						}
+					}														
+				}
+			}    
+			if ($error==1) {
+				echo "<script>alert('ha ocurrido un error fatal, elimine la receta que ha ingresado si esta se encontrara ingresada');</script>";        
+			}			
             echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">
-            <h1>Historial de recetas</h1>
-            ';          
+				 <h1>Historial de recetas</h1>';          
             $error=0;
 			$sql = "SELECT receta.codigo, receta.costo_tot,receta.fecha, receta.estado, cliente.nombre, cliente.apellido FROM `receta`,`cliente` WHERE receta.cod_cliente=cliente.dpi AND receta.cod_doc=".$_SESSION['dpi']."";
 			echo '<div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 ">';
@@ -108,35 +133,32 @@
 				$error=1;
 			}
 			if($error==0){
-			for($i=0;$i<$x;$i++){
-				$sql = "SELECT detalle.dosis, detalle.cantidad, medicamento.nombre, medicamento.presentacion, detalle.total FROM `detalle`,`medicamento` WHERE medicamento.codigo=detalle.cod_med AND detalle.cod_receta=".$mat2[$i][0]." ";
-				$result = $conn->query($sql);
-				echo '<p class="accordion">De: '.$mat2[$i][4].' el: '.$mat2[$i][3].' estado:'.$mat2[$i][2].'</p>
-				<div class="panel">
-				<div class="p2">
-				<table>               
-            		<tr>
-					<th>Medicamento</th><th>Presentacion</th><th>Dosis</th><th>Cantidad</th><th>Costo total</th>
-					 </tr>';
-			if ($result->num_rows > 0) {				
-				while($row = $result->fetch_assoc()) {	
-				echo"<tr>
-					<td>".$row["nombre"]."</td><td>".$row["presentacion"]."</td><td>".$row["dosis"]."</td><td>".$row["cantidad"]."</td><td>".$row["total"]."</td>
-					</tr>";							
+				for($i=0;$i<$x;$i++){
+					$sql = "SELECT detalle.dosis, detalle.cantidad, medicamento.nombre, medicamento.presentacion, detalle.total FROM `detalle`,`medicamento` WHERE medicamento.codigo=detalle.cod_med AND detalle.cod_receta=".$mat2[$i][0]." ";
+					$result = $conn->query($sql);
+					echo '<p class="accordion">De: '.$mat2[$i][4].' el: '.$mat2[$i][3].' estado:'.$mat2[$i][2].'</p>
+					<div class="panel">
+					<div class="p2">
+					<table>               
+						<tr>
+						<th>Medicamento</th><th>Presentacion</th><th>Dosis</th><th>Cantidad</th><th>Costo total</th>
+						</tr>';
+				if ($result->num_rows > 0) {				
+					while($row = $result->fetch_assoc()) {	
+					echo"<tr>
+						<td>".$row["nombre"]."</td><td>".$row["presentacion"]."</td><td>".$row["dosis"]."</td><td>".$row["cantidad"]."</td><td>".$row["total"]."</td>
+						</tr>";							
+					}
+				} else {
+					echo "<script>alert('Ocurrio un error, no se logro obtener los medicamentes de la receta.');</script>";
 				}
-			} else {
-				echo "0 results";
-			}
-			echo '<tr><td></td><td></td><td></td><td></td><td><span class="badge badge-success	">Total a pagar: '.$mat2[$i][1].'</span>		</td></tr></table>
-                </div>
-                
-			 <input type="text" name="receta" value="'.$mat2[$i][0].'" hidden>			
-                </div>
-                
-              ';
-			}
+				echo '<tr><td></td><td></td><td></td><td></td><td><span class="badge badge-success	">Total a pagar: '.$mat2[$i][1].'</span>		</td></tr></table>
+					 </div>
+			         <input type="text" name="receta" value="'.$mat2[$i][0].'" hidden>			
+					 </div>';
+				}
 			}else{
-
+				echo "<script>alert('actualmente no tiene recetas ingresadas.');</script>";
 			}			
 			$conn->close();	           		
 			?>
